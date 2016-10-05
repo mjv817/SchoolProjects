@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+ 
+<html>
+    <head>
+        <title>Echo Chamber</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            h1 {color:green}
+            form {color:red}
+            body {background-color:lightblue}
+        </style>
+    </head>
+    <body>
+        <h1 style="font-size:200%;">Holding Tank Simulator</h1>
+        <h2 style="font-size:100%;">Enter 1 for Size Small (250 ML)</h2>
+        <h2 style="font-size:100%;">Enter 2 for Size Medium (300 ML)</h2>
+        <h2 style="font-size:100%;">Enter 3 for Size Large (350 ML)</h2>
+        <h2 style="font-size:100%;">Enter 4 for Size Extra Large (400 ML)</h2>
+        <h2 style="font-size:100%;">Enter Custom Size in ML in any output valve</h2>
+        <form>       
+            <input type="text" id="messageinput"/> 
+            Valve B1 <button type="button" onclick="send();" > Click Valve B1</button><br> 
+            <input type="text" id="messageinput2"/>
+            Valve B2 <button type="button" onclick="send2();" >Click Valve B2</button><br>
+            <input type="text" id="messageinput3"/>
+            Valve B3 <button type="button" onclick="send3();" >Click Valve B3</button><br>
+            <input type="text" id="messageinput4"/>
+            Valve B4 <button type="button" onclick="send4();" >Click Valve B4</button><br>
+            <input type="text" id="messageinput5"/> Enter Temperature  <button type="button" onclick="send5();" >Temp</button><br>
+            
+        </form>
+        <div>
+            
+            <button type="button" onclick="powerOnSystem();" >Power on system</button><br>
+            <button type="button" onclick="turnOnInputValve();">Turn on incoming product</button>
+            <button type="button" onclick ="turnOffInputValve();"> Turn off incoming product</button><br>
+            <button type="button" onclick ="turnOffBurner();">Turn off Heating Element</button><br>
+            <button type="button" onclick ="sendErrorReport();">Click to see any Errors</button><br>
+            <button type="button" onclick="closeSocket();" >Power off system</button><br>
+            
+            
+        </div>
+        <!-- Server responses get written here -->
+        <div id="messages"></div>
+        <div id="messages2"></div>
+        <div id="messages3"></div>
+        <div id="messages4"></div>
+        <!-- Script to utilise the WebSocket -->
+        <script type="text/javascript">
+                       
+            var webSocket;
+            var messages = document.getElementById("messages");
+            var messages2 = document.getElementById("messages2");
+            var messages3 = document.getElementById("messages3");
+            var messages4 = document.getElementById("messages4");
+
+            
+            function powerOnSystem() {
+                webSocket = new WebSocket("ws://localhost:8080/WorkingWeb/echo");
+                webSocket.onopen = function(event) {
+                    if (event.data == undefined)
+                        return;
+                        
+                    writeResponse(event.data);
+                }
+                
+                webSocket.onmessage = function(event) {
+                    writeResponse(event.data);
+                }
+                
+                webSocket.onclose = function(event) {
+                    writeResponse("Holding Tank is now off");
+                }
+                
+            }
+           
+           
+           function turnOnInputValve() {
+               var text = "on";
+               webSocket.send(text);
+               //writeResponse2("Input Valve is on");
+           }
+           
+           function turnOffInputValve() {
+               var text = "off";
+               webSocket.send(text);
+               //writeResponse2("Input Valve is off");
+           }
+           
+           function sendErrorReport() {
+               var text = "error";
+               webSocket.send(text);
+           }
+           
+           
+           
+           function turnOffBurner() {
+               var text = "burneroff";
+               webSocket.send(text);
+               writeResponse("Heating Element is off");
+           }
+            /**
+             * Sends the value of the text input to the server
+             */
+            function send(){
+                var text = document.getElementById("messageinput").value;    
+                webSocket.send(text);
+                writeResponse2("Size Selection:");
+                text = document.getElementById("messageinput").value = "";
+
+            }
+           
+           function send2() {
+               var text = document.getElementById("messageinput2").value;
+               webSocket.send(text);
+               writeResponse2("Size Selection:");
+               text = document.getElementById("messageinput2").value = "";
+           }
+           
+           function send3() {
+               var text = document.getElementById("messageinput3").value;
+               webSocket.send(text);
+               writeResponse2("Size Selection:");
+               text = document.getElementById("messageinput3").value = "";
+           }
+           
+           function send4() {
+               var text = document.getElementById("messageinput4").value;
+               webSocket.send(text);
+               writeResponse2("Size Selection:");
+               text = document.getElementById("messageinput4").value = "";
+           }
+           
+           function send5() {
+               var text = document.getElementById("messageinput5").value;
+               
+               webSocket.send("temp" + text);
+               writeResponse2("Size Selection:");
+               text = document.getElementById("messageinput5").value = "";               
+           }
+
+            function closeSocket(){
+                webSocket.close();
+            }
+            
+            function writeResponse(text){
+                
+                messages.innerHTML += "<br/>" + text;
+                //messages2.innerHTML += " Size for B2<br/>" + text;
+                //messages3.innerHTML += " Size for B3<br/>" + text;
+               // messages4.innerHTML += " Size for B4<br/>" + text;
+            }
+            function writeResponse2(text) {
+                messages.innerHTML += "<br/>" + text;
+                messages.innerHTML = "";
+            }
+          
+        </script>
+       
+    </body>
+
+    </html>
